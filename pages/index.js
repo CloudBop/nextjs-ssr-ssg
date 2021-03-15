@@ -28,6 +28,9 @@ export async function getStaticProps() {
     props: {
       products: data.products
     }
+    // INCREMENTAL STATIC GENERATION
+    // in dev it will update everytime.
+    // revalidate: 10 // seconds
   };
 }
 
