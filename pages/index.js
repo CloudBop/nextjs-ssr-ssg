@@ -15,7 +15,7 @@ function HomePage(props) {
 
 // this is all ssr - it's never run on client
 // it is run at build time to create 'static' / 'pre-rendered' pages (SSG)
-export async function getStaticProps() {
+export async function getStaticProps(context) {
   // next understands not to bundle libs/deps used here on client
 
   // cwd !== /pages
@@ -24,10 +24,28 @@ export async function getStaticProps() {
 
   const jsonData = await fs.readFile(filePath);
   const data = JSON.parse(jsonData);
+
+  if (!data) {
+    return {
+      //  no data found, go home.
+      redirect: { destination: "/" }
+    };
+  }
+
+  if (data.products.length === 0) {
+    // set to 404
+    return { notFound: true };
+  }
+
   return {
     props: {
       products: data.products
-    }
+    },
+    notFound: false
+
+    // redirect page
+    // redirect:
+
     // INCREMENTAL STATIC GENERATION
     // in dev it will update everytime.
     // revalidate: 10 // seconds
