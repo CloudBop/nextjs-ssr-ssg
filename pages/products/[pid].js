@@ -28,7 +28,7 @@ async function getData() {
 export async function getStaticPaths() {
   const data = await getData();
 
-  const ids = data.product.map(product => product.id);
+  const ids = data.products.map(product => product.id);
   const pathsWithParams = ids.map(id => ({ params: { pid: id } }));
   return {
     // list all known paths to be SSG
