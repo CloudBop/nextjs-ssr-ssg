@@ -34,9 +34,9 @@ export async function getStaticPaths() {
     // list all known paths to be SSG
     // these get passed into getStaticProps( context )
     paths: pathsWithParams,
-    // see notes below. If
+    // see notes below.
     fallback: false
-
+    // if true -> try and render page anyway, make request. -> remember to check !product in getStaticProps
     // - notes
     // useful for not pre-rendering pages that are not frequently visited || if we don't know excatly how many to pre-render
     // tell nextjs to load on request if they're not pre-rendered
@@ -51,12 +51,15 @@ export async function getStaticPaths() {
 
 export async function getStaticProps(context) {
   const { params } = context;
-
   const productId = params.pid;
-
   const data = await getData();
-
   const product = data.products.find(p => p.id === productId);
+
+  if (!product) {
+    return {
+      notFound: true
+    };
+  }
 
   return {
     props: {
