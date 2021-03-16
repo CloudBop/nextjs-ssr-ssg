@@ -17,21 +17,32 @@ function ProductPage({ product }) {
   );
 }
 
+async function getData() {
+  const filePath = path.join(process.cwd(), "data", "dummy-backend.json");
+  const jsonData = await fs.readFile(filePath);
+  const data = JSON.parse(jsonData);
+  return data;
+}
+//
 //  SSR + SSG of dynamic pages
 export async function getStaticPaths() {
+  const data = await getData();
+
+  const ids = data.product.map(product => product.id);
+  const pathsWithParams = ids.map(id => ({ params: { pid: id } }));
   return {
     // list all known paths to be SSG
-    paths: [
-      // these get passed into getStaticProps( context )
-      { params: { pid: "p1" } },
-      { params: { pid: "p2" } }
-      // { params: { pid: "p3" } }
-    ],
+    // these get passed into getStaticProps( context )
+    paths: pathsWithParams,
+    // see notes below. If
+    fallback: false
+
+    // - notes
+    // useful for not pre-rendering pages that are not frequently visited || if we don't know excatly how many to pre-render
     // tell nextjs to load on request if they're not pre-rendered
     // will error if page is refreshed as data will not be there.
     // requires defensive rendering on client component (1)
-    fallback: true
-    // useful for not pre-rendering pages that are not frequently visited
+    // fallback: true
 
     // similar to above will block render until req has res - means we can ignore defensive hydration component
     // fallback: "blocking"
@@ -43,9 +54,7 @@ export async function getStaticProps(context) {
 
   const productId = params.pid;
 
-  const filePath = path.join(process.cwd(), "data", "dummy-backend.json");
-  const jsonData = await fs.readFile(filePath);
-  const data = JSON.parse(jsonData);
+  const data = await getData();
 
   const product = data.products.find(p => p.id === productId);
 
