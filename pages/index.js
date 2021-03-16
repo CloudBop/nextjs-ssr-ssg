@@ -1,13 +1,19 @@
 import path from "path";
 import fs from "fs/promises";
-
+import Link from "next/link";
 function HomePage(props) {
   //
   const { products } = props;
   return (
     <ul>
       {products.map(prod => {
-        return <li key={prod.id}>{prod.title}</li>;
+        return (
+          <li key={prod.id}>
+            <Link href={`/${prod.id}`}>
+              <a>{prod.title}</a>
+            </Link>
+          </li>
+        );
       })}
     </ul>
   );
