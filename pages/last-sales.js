@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import useSWR from "swr";
 
-function LastSalesPage() {
-  const [sales, setSales] = useState(null);
+function LastSalesPage(props) {
+  const [sales, setSales] = useState(props.sales);
   // const [loading, setLoading] = useState(true);
 
   const { data, error } = useSWR(
@@ -34,7 +34,7 @@ function LastSalesPage() {
     return <p>Failed to load.</p>;
   }
 
-  if (!data || !sales === null) {
+  if (!data && !sales) {
     return <p>loading...</p>;
   }
 
@@ -50,6 +50,48 @@ function LastSalesPage() {
       </ul>
     </>
   );
+}
+
+// example of SSR prefecting
+export async function getStaticProps() {
+  const response = await fetch(
+    "https://my-nextjs-db-default-rtdb.firebaseio.com/sales.json"
+  );
+  const data = await response.json();
+  const intoArray = [];
+
+  if (data) {
+    for (const key in data) {
+      // if (Object.hasOwnProperty.call(object, key)) {
+      intoArray.push({
+        id: key,
+        username: data[key].username,
+        volume: data[key].volume
+      });
+    }
+  }
+
+  return { props: { sales: intoArray }, revalidate: 3000000 };
+
+  // - chained promises
+  // return fetch("https://my-nextjs-db-default-rtdb.firebaseio.com/sales.json")
+  //   .then(response => response.json())
+  //   .then(data => {
+  //     if (data) {
+  //       const intoArray = [];
+
+  //       for (const key in data) {
+  //         // if (Object.hasOwnProperty.call(object, key)) {
+  //         intoArray.push({
+  //           id: key,
+  //           username: data[key].username,
+  //           volume: data[key].volume
+  //         });
+  //       }
+  //     }
+
+  //     return { props: { sales: intoArray }, revalidate: 100 };
+  //   });
 }
 
 export default LastSalesPage;
